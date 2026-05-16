@@ -94,6 +94,18 @@ Nonegotiate	Nonegotiate	Disabled DTP negotiation
 | **[Nonegotiate](ca://s?q=Nonegotiate_DTP_Mode)**              | **[Nonegotiate](ca://s?q=Nonegotiate_DTP_Mode)**          | Disabled DTP negotiation                                      |
 
 
+| **[Administrative Mode](ca://s?q=Explain_Administrative_Mode)** | **[Operational Mode](ca://s?q=Explain_Operational_Mode)** | **[Resulting Link State](ca://s?q=Resulting_DTP_Link_State)** |
+| --- | --- | --- |
+| **[Desirable](ca://s?q=Desirable_DTP_Mode)** | **[Desirable](ca://s?q=Desirable_DTP_Mode)** | Trunk |
+| **[Desirable](ca://s?q=Desirable_DTP_Mode)** | **[Auto](ca://s?q=Auto_DTP_Mode)** | Trunk |
+| **[Auto](ca://s?q=Auto_DTP_Mode)** | **[Auto](ca://s?q=Auto_DTP_Mode)** | Access |
+| **[Trunk](ca://s?q=Trunk_DTP_Mode)** | **[Trunk](ca://s?q=Trunk_DTP_Mode)** | Trunk |
+| **[Access](ca://s?q=Access_DTP_Mode)** | **[Access](ca://s?q=Access_DTP_Mode)** | Down |
+| **[Trunk](ca://s?q=Trunk_DTP_Mode)** | **[Access](ca://s?q=Access_DTP_Mode)** | Access |
+| **[Nonegotiate](ca://s?q=Nonegotiate_DTP_Mode)** | **[Nonegotiate](ca://s?q=Nonegotiate_DTP_Mode)** | Disabled DTP negotiation |
+
+
+
 CO Pilot:
 
 Switchport Mode Categories
