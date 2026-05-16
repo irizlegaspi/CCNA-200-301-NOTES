@@ -1,1 +1,360 @@
+VTP - VIRTUAL TRUNKING PROTOCOL
+---------------------------------
+- CISCO PROPRIETARY PROTOCOL
+- AUTOMATES VLAN PROPAGATION
+- EASIER TO MANAGE VLAN
+- SWITCHES SAVED THEIR STARTUP CONFIG TO A FLASH MEMORY
+- VTP TURNED ON BY DEFAULT AND IN SERVER MODE, CANNOT BE TURNED OFF
+
+
+Routers saved configuration in a start-up config and saved in NVRAM (non-Volatile RAM)
+
+
+SW1#SH FLASH or dir flash:
+Directory of flash:/
+
+    1  -rw-     3058048    <no date>  c2950-i6q4l2-mz.121-22.EA4.bin 	- IOS
+    3  -rw-        2046    <no date>  config.text  			- STARTUP CONFIG
+    4  -rw-         796    <no date>  vlan.dat 				- AUTOMATIC SAVED BY VLAN
+
+
+*** VTP UPDATE - INCLUDES INFORMATION FROM SH VTP STATUS AND THE VLAN.DAT
+
+
+VTP MODES
+===========
+1. SERVER Mode
+	- DEFAULT VTP MODE
+	- CAN ADD,EDIT & DELETE VLANS
+	- IF RECEIVES A VTP UPDATE W/ A HIGHER REVISION#, IT WILL OVERWRITE VLAN.DAT AND FORWARD THAT VTP UPDATE OUT ON ALL TRUNKS
+
+	
+2. CLIENT Mode
+	- NO ADD, NO EDIT, NO DELETE VLANS
+	- IF RECEIVES A VTP UPDATE W/ A HIGHER REVISION#, IT WILL OVERWRITE VLAN.DAT AND FORWARD THAT VTP UPDATE OUT ON ALL TRUNKS
+
+3. TRANSPARENT Mode
+	- CAN ADD, EDIT & DELETE VLANS
+	- IF THERE IS A VLAN CHANGE, IT WILL NOT INCREMENT REV#, IT WIL NOT FORWARD A VTP UPDATE.
+	- CONFIGURATION REV# IS ALWAYS ZERO, *IF RECEIVES A VTP UPDATE: WILL NOT PROCESS, BUT WILL FORWARD THE UPDATE ON ALL TRUNKS.
+	
+
+BEST PRACTICE WHEN THERE IS A NEW SWITCHES 
+-------------------------------------------
+1. CHECK VLAN.DAT, USE THIS COMMAND
+	delete flash:vlan.dat
+
+2. ALWAYS CONFIGURE THE NEW SWITCH WITH VTP DOMAIN AND VTP PASSWORD
+
+
+! use command #sho vtp status
+
+
+VTP CONIGURATION
+===================
+
+WAYS TO CONFIGURE VTP
+1. VTP CONFIG MODE WAY
+	- SUPPORTED BY NEWER CISCO SWITCHES
+	- INCLUDED IN CCNA EXAM
+	- SYNTAX:
+		conf t
+		! IF YOU WANT THE SWITCH TO BECOME A VTP SERVER
+		vtp mode server  
+		!
+		! IF YOU WANT THE SWITCH TO BECOME A VTP CLIENT
+		vtp mode client
+		!
+		! IF YOU WANT THE SWITCH TO BECOME A VTP TRANSPARENT
+		vtp mode transparent
+		!
+		vtp version 2
+		vtp domain <domain name>
+		vtp domain password <password>
+		exit
+
+2. VTP Database MODE WAY
+	- SUPPORTED BY OLDER SWITCHES
+	- SYNTAX:	
+		enable
+		vlan database
+		! IF YOU WANT THE SWITCH TO BECOME A VTP SERVER
+		vtp server  
+		!
+		! IF YOU WANT THE SWITCH TO BECOME A VTP CLIENT
+		vtp client
+		!
+		! IF YOU WANT THE SWITCH TO BECOME A VTP TRANSPARENT
+		vtp transparent
+		!
+		vtp version 2
+		vtp domain <domain name>
+		vtp password <password>
+		exit
+
+
+SCENARIO
+SW1 ==> SERVER
+SW2 ==> CLIENT
+SW3 ==> CLIENT
+
+DOMAIN NAME 	= ccnatraining
+DOMAIN PASSWORD = mnet
+
+
+SW1
+----
+conf t
+vtp mode server 
+vtp domain ccnatraining
+vtp password mnet
+vtp version 2
+exit
+
+sh vtp status
+sh vtp password
+
+SW2
+----
+conf t
+vtp mode client 
+vtp domain ccnatraining
+vtp password mnet
+vtp version 2
+exit
+
+sh vtp status
+sh vtp password
+sh vlan br
+
+
+SW3
+----
+conf t
+vtp mode client 
+vtp domain ccnatraining
+vtp password mnet
+vtp version 2
+exit
+
+sh vtp status
+sh vtp password
+sh vlan br
+
+
+! INITIALIZE UPDATE, CREATE TEST VLAN 88
+
+SW1
+---
+conf t
+vlan 88
+name TEST88
+exit
+
+VERIFY: sh vlan br
+	sh vtp status
+
+
+TO VERIFY THE UPDATE OF VTP IN EACH SWITCHES?
+CHECK THE FOLLOWING:
+1. Domain name
+2. Password
+3. version
+4. Trunk?
+
+Verify:
+sh int trunk
+sh int <interface name> switchport
+
+
+
+! To change a VTP server to client mode, follow these steps:
+
+Access the switch in EXEC mode.
+Enter VLAN configuration mode:
+Switch# vlan database
+
+Set the VTP domain name (if needed):
+Switch(vlan)# vtp domain <domain_name>
+
+Change the VTP mode to client:
+Switch(vlan)# vtp client
+
+Exit VLAN configuration mode:
+Switch(vlan)# exit
+
+
+
+==================================================
+
+
+
+
+
+! VERIFY TRUNK MODES TO DYNAMIC DESIRABLE
+SW1
+----
+sh interface trunk
+sh interface f0/2 switchport
+sh interface f0/3 switchport
+
+
+SW2
+----
+sh interface trunk
+sh interface f0/2 switchport
+sh interface f0/1 switchport
+
+SW3
+----
+sh interface trunk
+sh interface f0/1 switchport
+sh interface f0/3 switchport
+
+
+! CONFIGURE TRUNKING MODE TO ALL INTERFACES CONNECTED TO SWITCHES FOR THE VTP UPDATE TO PROPAGATE
+
+SW1
+-----
+conf t
+interface range f0/2 - 3
+switchport mode trunk
+exit
+
+
+SW2
+-----
+conf t
+interface range f0/1 - 2
+switchport mode trunk
+exit
+
+
+SW3
+-----
+conf t
+interface range f0/1, f0/3
+switchport mode trunk
+exit
+
+
+
+VERIFY
+sh int trunk
+sh vtp status
+sh vlan br
+
+
+! CONFIGURE PORT ASSIGNMENTS TO SWITCHES TO PROPAGATE TO OTHER SWITCHES
+! VLAN ID and VLAN NAME are the ones propagated in VTP, manually configure the port assignment!
+
+SW2
+-----
+conf t
+int range f0/3 - 8
+switchport mode access
+switchport access vlan 10
+no shut
+exit
+!
+int range f0/9 - 12
+switchport mode access
+switchport access vlan 20
+no shut
+exit
+!
+int range f0/13 - 15
+switchport mode access
+switchport access vlan 30
+no shut
+exit
+!
+int range f0/16 - 19
+switchport mode access
+switchport access vlan 40
+no shut
+exit
+!
+int range f0/20 - 24
+shut
+exit
+exit
+
+!
+!
+
+SW3
+-----
+conf t
+int range f0/4 - 7
+switchport mode access
+switchport access vlan 10
+no shut
+exit
+!
+int range f0/8 - 11
+switchport mode access
+switchport access vlan 20
+no shut
+exit
+!
+int range f0/12 - 16
+switchport mode access
+switchport access vlan 30
+no shut
+exit
+!
+int range f0/17 - 21
+switchport mode access
+switchport access vlan 40
+no shut
+exit
+!
+int range f0/22 - 24
+shut
+exit
+exit
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
