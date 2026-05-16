@@ -2,15 +2,72 @@ VLAN - VIRTUAL LOCAL AREA NETWORK
 ==================================
 LAN 	- GROUP OF DEVICES WHERE LOCALLY CABLED
 VLAN	- GROUP OF DEVICES WHERE ALL DEVICES RECEIVES BROADCAST
-	- NETWORK ADDRESS
-	- LOGICALLY DIVIDE NETWORK INTO DIFFERENT BROADCAST DOMAINS BY INFORMING THE SWITCH WHAT ARE THE GROUPS OF DEVICES IN YOUR NETWROK AND WHICH PORT DOES THESE DEVICES IS CONNECTED TO IN ITS INTERFACES.
-	- EVERY GROUP IS A DIFFERENT DOMAIN
+		- NETWORK ADDRESS
+		- LOGICALLY DIVIDE NETWORK INTO DIFFERENT BROADCAST DOMAINS BY INFORMING THE SWITCH WHAT ARE THE GROUPS OF DEVICES IN YOUR NETWROK AND WHICH PORT DOES THESE DEVICES IS CONNECTED TO IN ITS INTERFACES.
+		- EVERY GROUP IS A DIFFERENT DOMAIN
+
+
+
+52 VLANs Fundamentals
+=======================
+VLAN- Virtual Local Area networks (LAN) 
+- segmenting of broadcast domains to improve security and increase network efficiency.
+- VLANs are used to virtually or logically divide or segment devices into different broadcast domain.
+- VLANS are configure to Switch to be able to forward broadcast to devices within the same broadcast domain or within the same subnet address.
+- We can be group broadcast by Switch interfaces.
+
+	Ex. 	HR 	fa0/4,fa0/5, fa0/6 	- broadcast domain
+	 	IT 	fa0/7, fa0/8, fa0/9 	- broadcast domain
+		SALES 	fa0/7, fa0/8, fa0/9 	- broadcast domain
+
+
+SWITCH: layer 2: LAN:
+1. Broadcast
+2. Network Address
+	HR: 192.168.10.0/24
+	IT: 192.168.20.0/24
+	SALES: 192.168.30.0/24
+
+
+Types of Switches
+1. Managed - like Cisco
+2. Unmanaged - Plug and Play
+
+Switch default:
+1. one port/interface equals one collision domain
+2. One big broadcast domain
+
+
+In Switch perspective
+
+LAN - is a group of end devices interconnected by a switch located in a physical location.
+LAN is a Broadcast Domain.
+LAN is also a network or subnet address; therefore, network or subnet address is also a broadcast address. 
+End Devices must be in the same subnet to receives each other's broadcast.
+
+Broadcast Message = is a frame with destination MAC address of FFFF.FFFF.FFFF
+Switch forwards frames based on MAC Address and to all its active interfaces.
+
+
+Steps to Create VLANs
+1. Create the Vlan # and Vlan Name
+	SW(config)#vlan 10
+	SW(config)#name HR
+	SW(config)#exit
+	
+2. Assign ports to Vlans - take not of the 2 types of switchport modes (trunk and access)
+	SW(config)#int fa0/2 or use the int range int fa0/3 - 6
+	SW(config)#switchport mode access
+	SW(config)#switchport access vlan 10
+	SW(config)#exit
+
+
 
 
 SWITCH DEFAULT:
 ------------------
-- ONE PORT /INTERFACE = ONE COLLISION DOMAIN
-- Switch is ONE BIG BROADCAST DOMAIN - floods all the port with the broadcast message.
+- ONE PORT /INTERFACE = ONE COLLISION DOMAIN, one port/interface equals one collision domain
+- Switch is ONE BIG BROADCAST DOMAIN - floods all the port with the broadcast message, One big broadcast domain
 - SWITCH IS A LAYER 2 DEVICE that FORWARD PACKET BASED ON MAC ADDRESS (SOURCE/DSRTINATION)
 						     ---------------------------------
 
@@ -130,3 +187,26 @@ conf t
 interface range f0/20-24
 shutdown
 exit
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
