@@ -74,12 +74,12 @@ Statically or Manually Configured Switchport Modes
 
 Administrative Mode		Operational Mode
 Desirable 	- Desirable	  Trunk
-Desirable 	- Auto		    Trunk
-Auto 		    - Auto		    Access
-Trunk		    - Trunk		    Trunk
-Access		  - Access	    Down
-Trunk		    - Access	    Access
-NoN		      - NoN		      Disabled DTP negotiation
+Desirable 	- Auto		   Trunk
+Auto 		- Auto		   Access
+Trunk		- Trunk		   Trunk
+Access		- Access	   Down
+Trunk		- Access	   Access
+NoN		    - NoN		   Disabled DTP negotiation
 
 
 CO Pilot:
