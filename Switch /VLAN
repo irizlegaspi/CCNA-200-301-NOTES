@@ -1,0 +1,132 @@
+VLAN - VIRTUAL LOCAL AREA NETWORK
+==================================
+LAN 	- GROUP OF DEVICES WHERE LOCALLY CABLED
+VLAN	- GROUP OF DEVICES WHERE ALL DEVICES RECEIVES BROADCAST
+	- NETWORK ADDRESS
+	- LOGICALLY DIVIDE NETWORK INTO DIFFERENT BROADCAST DOMAINS BY INFORMING THE SWITCH WHAT ARE THE GROUPS OF DEVICES IN YOUR NETWROK AND WHICH PORT DOES THESE DEVICES IS CONNECTED TO IN ITS INTERFACES.
+	- EVERY GROUP IS A DIFFERENT DOMAIN
+
+
+SWITCH DEFAULT:
+------------------
+- ONE PORT /INTERFACE = ONE COLLISION DOMAIN
+- Switch is ONE BIG BROADCAST DOMAIN - floods all the port with the broadcast message.
+- SWITCH IS A LAYER 2 DEVICE that FORWARD PACKET BASED ON MAC ADDRESS (SOURCE/DSRTINATION)
+						     ---------------------------------
+
+
+DISADVANTAGE OF A SWITCH
+-------------------------
+1. INEFFICIENT NETWORK CAUSE BY EXCESSIVE BROADCAST, BROADCAST SLOWS DOWN YOUR NETWORK.
+2. SECURITY ISSUE
+
+
+CONFIGURING VLANS
+======================
+
+WAYS TO CONFIGURE VLANS
+-----------------------
+1. VLAN CONFIGURATION MODE WAY
+	- SUPPORTED BY NEWER CISCO SWITCHES
+	- INCLUDED IN CCNA EXAM
+	- SYNTAX:
+		conf t
+		vlan 10
+		name IT
+		exit
+
+2. VLAN DATABASE MODE WAY
+	- SUPPORTED BY OLDER SWITCHES
+	- CONFIGURE IN ENABLE MODE
+	- SYNTAX:	
+		enable
+		vlan database
+		vlan 10 name IT
+		exit
+		
+
+! If you want to reset the interface to its default state, use:
+! default interface <interface_name>
+
+
+
+SW1 USING THE VLAN CONFIGURATION MODE WAY
+-----------------------------------------
+1. CREATE VLAN AND VLAN NAME
+conf t	
+vlan 10
+name IT
+
+vlan 20
+name SALES
+
+vlan 30
+name ADMIN
+
+vlan 40 
+name MARKETING
+exit
+
+VERIFY
+sh vlan br
+
+2. ASSIGN THE PORTS TO ITS PROPER VLANS - 
+** YOU CAN ONLY ASSIGN AN ACCESS PORT TO A VLAN BUT NEVER TO TRUNK PORTS, 
+AN ACCESS PORTS CAN ONLY BE A MEMBER OF ONE VLAN BUT A TRUNK INTERFACE IS A 
+MEMBER OF ALL VLANS SUCH THAT ALL BROADCAST FROM ALL VLANS ARE SEND OUT TO ALL TRUNK INTERFACES
+
+conf t
+interface f0/4
+switchport mode access
+!
+! TO ASSIGN THIS PORT TO VLAN 
+!
+switchport access vlan 10 <vlan #/id>
+exit
+!
+! OR USE THE INT RANGE COMMAND
+! USE INTERFACE RANGE COMMAND TO ASSIGN MULTIPLE SEQUENCIAL # OF INTERFACE
+! #interface range fa0/4-8 command
+!
+
+conf t
+interface range f0/4 -8
+switchport mode access
+switchport access vlan 10
+no shut
+exit
+!
+
+interface range f0/9 - 11
+switchport mode access
+switchport access vlan 20
+no shut
+exit
+!
+
+interface range f0/12 - 15
+switchport mode access
+switchport access vlan 30
+no shut
+exit
+!
+
+interface range f0/16 - 19
+switchport mode access
+switchport access vlan 40
+no shut
+exit
+
+interface range f0/20-24
+shutdown
+exit
+
+VERIFY
+sh vlan br
+
+! TO SHUTDOWN UNUSED PORTS
+-----------------------------
+conf t
+interface range f0/20-24
+shutdown
+exit
