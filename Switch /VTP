@@ -103,6 +103,9 @@ WAYS TO CONFIGURE VTP
 		exit
 
 
+Screenshot 2026-05-16 155307.png
+
+
 SCENARIO
 SW1 ==> SERVER
 SW2 ==> CLIENT
