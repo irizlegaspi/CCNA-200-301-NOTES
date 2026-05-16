@@ -1,0 +1,84 @@
+TTRUNKING ENCAPSULATION
+========================
+
+PC1 -------f0/4 SW2 f0/3 (Trunk port) --------(trunk port) f0/3 SW1 f0/2 ----- PC2
+
+
+VLAN Port Assignment:
+SW1: VLAN 10 -- f0/4, f0/5, f0/6
+
+SW2: VLAN 10 -- f/02, f0/4, f0/8
+
+PC2: IP-1.1.1.1 MAC- ?
+PC1  will send ARP by sending a broadcast message to SW1
+SW2 will check/examine the destination MAC ADDR of the ARP to know where to forward the message.
+SW2 will show the VLAN, and will determine what VLAN the frame is for.
+Note: the behavior of the sw in Vlan, if the SW receives a broadcast (FFFFx12) from an interface, the SW will forward that broadcast to all the interfaces/ports that are member of the same vlan (f0/5 and f0/6)  
+na ka member ng ingress interface (f0/4), including the trunk port interface (f0/3) connected to f0/3 SW1, trunk ports receives  broadcast from all vlans, though the trunk port is not a member of any vlan
+now, SW1 receives the broadcast message, SW1 will send the broadcast message to all ports that is a member of the ingress (f0/3) vlan, but remember that trunk port is not a member of any vlan.
+
+* NOTE
+WE CAN ONLY ASSIGN ACCESS PORTS TO VLANS, NEVER TRUNK PORTS
+
+SW1 will have the problem and doesn't know which vlan the sw1 will forward the broadcast, the trunking encapsulation will answer this problem by adding extra headers and vlan id (vlan tagging) and trailers to the trunking encapsulation
+
+
+TYPE OF TRUNKNG ENCAPSULATION
+1. ISL  - INTERSWITCH LINK
+	- CISCO PROPRIETARY / OLD CISCO DEVICES SUPPORTS ISL - DEFAULT TRUNKING ENCAP.
+	- ADDING OF ENCAPSULATION HEADERS TO FRAME:
+		HEADERS | VLAN ID (what vLAN the frame belongs  | ORGINAL FRAME | TRAILERS
+		<-----------30 BYTES-------------------->		                     <-30 Bytes->	
+	- Disadvantage: added 30bytes slow down the switch performance
+	- Turned on by default
+
+2. 802.1Q/DOT1Q - TO INFORM THE NEIGHBORS SWITHC IN WHICH VLAN IT IS BELONG
+		- IEEE OPEN STANDARD
+		- SUPPORTS BY NEWER CISCO DEVICE
+		- ADDING OF ENCAPSULATION HEADERS TO FRAME:
+		  VLAN ID (VLAN TAG) | ORGINAL FRAME 
+		 <-----4 BYTES----->		  
+
+
+TTRUNKING ENCAPSULATION CONFIGURATION
+========================================
+
+SYNTAX:
+SW1
+----
+conf t
+int f0/1
+switchport mode trunk
+switchport trunk encapsulation dot1q
+! in newer model of switches the encapsulation dot 1q is already configure, if error occur you can verify the encapsulation by issuing the command  sh int f0/1 switchport
+exit
+
+
+VERIFY:
+sh int f0/1 switchport
+
+
+L3SW1
+----
+conf t
+int f0/1
+switchport trunk encapsulation dot1q
+switchport mode trunk
+! depends on the switch model, "switchport trunk encapsulation dot1q" is configured first before the  "switchport mode trunk" because of the set-up trunk encapsulation mode is set to default "Auto", (ISL, dot1q and auto)
+! you need to manually configure the "switchport trunk encapsulation dot1q" not to default the trunk encapsulation to ISL
+exit
+!
+int f0/2
+switchport trunk encapsulation dot1q
+switchport mode trunk
+exit
+
+
+VERIFY:
+sh int f0/1 switchport
+sh int f0/2 switchport
+sh int trunk
+
+
+
+
