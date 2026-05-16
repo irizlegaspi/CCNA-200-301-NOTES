@@ -1,0 +1,104 @@
+51. Switchport Modes
+========================
+- one of the configuration being manually configured in the switch
+
+
+
+
+
+DTP - Dynamic Trunking Protocol
+=================================
+- Negotiation protocol created by Cisco for 2 switches to automatically establish  a trunk link
+
+
+Types Switchport Links
+1. Trunk Links - Sends out DTP packets 
+	Ex. Router to SW, Sw to SW
+2. Access Links - Does not sends DTP packets
+	Ex. SW to PC, Server or Printer
+
+
+
+
+
+
+
+General Categories of Switchport Mode:
+1. Administrative Mode - configured mode of an interface, can be manually configured and a default configuration for switch int. 
+This is indeed the mode set by the network administrator and determines how the switchport is configured. 
+
+a. Dynamic Administrative Mode: Uses Dynamic Trunking Protocol (DTP) to negotiate the port mode dynamically.
+	- Dynamic Desirable: Actively initiates negotiation to establish a trunk link. Ready to trunk, actively sending packets. Dynamic mode is the default mode for the administrative mode.
+		Syntax: SW1(config)#int fa0/1
+			SW1(config)#switchport mode dynamic desirable
+			SW1(config)#exit
+
+		* default dynamic setting is commonly used by CORE and DISTRIBUTION switches 
+							     -------------------------------   
+
+	- Dynamic Auto: Passively waits for the other side to initiate trunk negotiation, only waiting to receive DTP packets, not sending DTP packets.
+		Syntax: SW1(config)#int fa0/5
+			SW1(config)#switchport mode dynamic auto
+			SW1(config)#exit
+
+		* dynamic auto is commonly  used by the ACCESS Switches
+							------
+
+b. Trunk Administrative Mode: Configured to carry traffic for multiple VLANs.
+c. Access Administrative Mode: Configured for a single VLAN, connecting end devices like PCs or printers.
+
+	
+
+2. Operational Mode - actual mode of switch interface. This reflects the actual mode in which the switchport is functioning at any given moment. It will be either:
+
+a. Access Mode: If the port is operating within a single VLAN.
+	- Access port - port connected to an access link
+b. Trunk Mode: If the port is carrying traffic from multiple VLANs.
+	- Trunk port - port connected to a trunk link
+	
+
+
+To verify switchport mode: #sh int <int name> switchport
+
+Statically or Manually Configured Switchport Modes
+1. Static Trunk - unconditionally set to be trunk interface, sends out DTP packets
+	Syntax: SW1(config)#int fa0/1
+		SW1(config)#switchport mode trunk
+		SW1(config)#exit
+			
+2. Static Access - unconditionally sets that interface to be an Access port, does not send DTP packets.
+	Syntax: SW1(config)#int fa0/5
+		SW1(config)#switchport mode access
+		SW1(config)#exit
+
+
+Administrative Mode		Operational Mode
+Desirable 	- Desirable	  Trunk
+Desirable 	- Auto		    Trunk
+Auto 		    - Auto		    Access
+Trunk		    - Trunk		    Trunk
+Access		  - Access	    Down
+Trunk		    - Access	    Access
+NoN		      - NoN		      Disabled DTP negotiation
+
+
+CO Pilot:
+
+Switchport Mode Categories
+1. Administrative Mode: This is indeed the mode set by the network administrator and determines how the switchport is configured. 
+Your breakdown is great:
+
+- Dynamic Administrative Mode: Uses Dynamic Trunking Protocol (DTP) to negotiate the port mode dynamically.
+	- Dynamic Desirable: Actively initiates negotiation to establish a trunk link.
+	- Dynamic Auto: Passively waits for the other side to initiate trunk negotiation.
+- Trunk Administrative Mode: Configured to carry traffic for multiple VLANs.
+- Access Administrative Mode: Configured for a single VLAN, connecting end devices like PCs or printers.
+
+
+2. Operational Mode: This reflects the actual mode in which the switchport is functioning at any given moment. It will be either:
+
+Access Mode: If the port is operating within a single VLAN.
+
+Trunk Mode: If the port is carrying traffic from multiple VLANs.
+
+
