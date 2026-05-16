@@ -17,8 +17,8 @@ VLAN- Virtual Local Area networks (LAN)
 - We can be group broadcast by Switch interfaces.
 
 	Ex. 	HR 	fa0/4,fa0/5, fa0/6 	- broadcast domain
-	 	IT 	fa0/7, fa0/8, fa0/9 	- broadcast domain
-		SALES 	fa0/7, fa0/8, fa0/9 	- broadcast domain
+	 		IT 	fa0/7, fa0/8, fa0/9 	- broadcast domain
+			SALES 	fa0/7, fa0/8, fa0/9 	- broadcast domain
 
 
 SWITCH: layer 2: LAN:
