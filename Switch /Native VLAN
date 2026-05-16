@@ -1,1 +1,263 @@
+Native, Data and Voice Vlans
+===============================
+
+native VLAN by default is the default Vlan - VLAN 1
+
+when encapsulation from 802.1q is used, we have native Vlan.
+802.1q trunk ports adds VLAN Headers on all frames. 
+All frames from native vlan or vlan 1 are sent out on 802.1q trunks untagged.
+							                                                      ---------
+
+If tagged- frames has source vlan header.
+If untagged - frames does not have source vlan header.
+                              ---------
+
+
+Types of Data
+1. Voice - traffic from Phone
+2. Data - traffic from the PC
+	Using VoIP Phone we can connect to Switch and to PCs via ethernet port
+
+
+Configuring Voice VLANS
+#conf t
+#int <int #>
+#switchport mode access
+#switchport access vlan <vlan id> (data vlan)
+#switchport voice vlan <vlan id> (voice vlan)
+
+#conf t
+#int fa0/4
+#switchport mode access
+#switchport access vlan 10
+#switchport voice vlan 30
+
+Verify:
+#sh int switchport
+
+
+
+
+
+NATIVE VLAN
+==============
+
+Native VLAN Encapsulation:
+- ISL 
+- 802.1Q
+
+Behavior:
+ISL - Encapsulates "all" frames sent out ISL Trunks. 
+Cisco proprietary 802.1Q - Native VLAN - 802.1Q add vlan header to all frames sent out 
+except for frames originating from its native vlan
+
+- Frames from the native VLAN, by default are sent out on 802.1q trunks untagged
+- If receiving 802.1q trunk receives an untagged frames, it will automatically assign that incoming frame to its native vlan.
+- it is required that both end to end trunks must have the same native vlans configured.
+
+- Native VLAN by default: VLAN 1 = untagged packet forwarded to vlan 1
+- By default, all frames from VLAN 1 will be sent out untagged on 802.1q trunks
+- End to end trunk links must have the same native vlan configured
+
+NOTE:
+- The native VLAN by default is the default VLAN1
+- the Default VLAN is NOT The Native VLAN
+- The Native VLAN can be changed to be a different VLAN
+
+- The default Native VLAN is always VLAN1
+- The Native VLAN can be changed to be a different VLAN
+- Trunks links can have different native vlans per link but, 
+a point-to-point trunk link must have the same native vlan.
+
+
+- Syntax: 
+conf t
+int f0/1
+switchport trunk encapsulation dot1q
+switchport mode trunk 
+switchport trunk native vlan <vlan id>
+exit
+
+
+
+-------------------------------------
+CONFIGURATION TRUNKING ENCAPSULATION
+------------------------------------- 
+L3SW1
+----
+conf t
+int f0/1
+switchport trunk encapsulation dot1q
+switchport mode trunk
+exit
+!
+int f0/2
+switchport trunk encapsulation dot1q
+switchport mode trunk
+exit
+
+Verify:
+L3SW1 #show interface trunk
+
+
+
+
+SW1
+----
+conf t
+int f0/1
+switchport trunk encapsulation dot1q
+switchport mode trunk
+exit
+!
+int f0/2
+switchport trunk encapsulation dot1q
+switchport mode trunk
+exit
+
+
+SW3
+----
+conf t
+int f0/1
+switchport trunk encapsulation dot1q
+switchport mode trunk
+exit
+!
+int f0/2
+switchport trunk encapsulation dot1q
+switchport mode trunk
+exit
+
+
+VERIFY:
+sh int trunk
+sh int f0/1 switchport
+sh int f0/2 switchport
+sh int trunk
+
+
+
+
+
+
+--------------------------
+! CREATE VLAN 10 AND 20
+--------------------------
+
+L3SW1
+----
+conf t
+vlan 10
+exit
+!
+vlan 20
+exit
+exit
+
+
+SW1
+----
+conf t
+vlan 10
+exit
+!
+vlan 20
+exit
+exit
+
+
+SW2
+----
+conf t
+vlan 10
+exit
+!
+vlan 20
+exit
+exit
+
+
+
+VERIFY
+sh vlan br
+sh int trunk
+
+
+
+
+--------------------------
+! CONFIGURE NATIVE VLAN
+---------------------------
+
+Configure L3SW to use VLAN 10 as the native VLAN for the f0/1 trunk interface
+
+
+SYNTAX:
+----------
+conf t
+int f0/1
+switchport trunk native vlan <vlan #>
+exit
+
+--------------- VLAN 10 -----------------
+L3SW1
+-----
+conf t
+int f0/1
+switchport trunk native vlan 10
+exit
+
+
+SW1
+-----
+conf t
+int f0/1
+switchport trunk native vlan 10
+exit
+
+
+verify: sh int trunk
+
+----------------- VLAN 20 ----------------
+
+SW1
+----
+conf t
+int f0/2
+switchport trunk native vlan 20
+exit
+
+
+SW2
+----
+int f0/2
+switchport trunk native vlan 20
+exit
+
+----------------- VLAN 1 -------------------
+
+SW2
+----
+conf t
+int f0/1
+switchport trunk native vlan 1
+exit
+!
+
+
+L3SW1
+-----
+int f0/2
+switchport trunk native vlan 1
+exit
+
+------------------------------------------------
+
+
+
+
+
+
+
 
