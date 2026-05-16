@@ -72,6 +72,16 @@ WAYS TO CONFIGURE VTP
 		vtp domain <domain name>
 		vtp domain password <password>
 		exit
+		!
+		conf t
+		vtp mode server  
+		vtp mode client/server/transparent
+		vtp version 2
+		vtp domain <domain name>
+		vtp domain password <password>
+		exit
+
+
 
 2. VTP Database MODE WAY
 	- SUPPORTED BY OLDER SWITCHES
