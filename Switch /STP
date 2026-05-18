@@ -1,1 +1,369 @@
+STP - SPANNING TREE PROTOCOL
+============================
 
+🌐 STP (Spanning Tree Protocol) is a Layer 2 protocol used in switching to prevent looping issues in networks with redundant paths. 
+Without STP, switches could forward frames endlessly in a loop, causing broadcast storms, MAC table instability, and multiple frame copies reaching devices—basically, network chaos.
+
+
+
+PROBLEMS WITH REDUNANT NETWORKS
+1. BROADCAST STORM
+2. INFINITE FRAMES TRANSMITTED & RECEIVED
+3. MAC ADDRESS TABLE INSTABILITY
+
+HOW STP WORKS
+1. STP IS TURNED ON BY DEFAULT
+	3 VARIATION OF LIGHT
+	- OFF
+	- AMBER - NOT YET CONNECTED TO NETWORK, TIME WERE STP IS INITILIAZING
+	- GREEN - STP PROCESS IS DONE AND IS IN FORWARDING STATE
+2. HOW SWITCHED DETECT IF THERE ARE SWITCHING LOOPS ?
+	A. EACH SWITCH HAS ITS OWN BRIDGE ID
+		BRIDGE ID	- BRIDGE PRIORITY 32768 - DEFAULT VALUE
+				- SYSTME ID - MAC ADDRESS
+	B.SWITCHES SENDS OUT BPDUs OUT ON ALL ACTIVE INTERFACES 
+		BPDU 	- BRIDGE PROTOCOL DATA UNIT
+			- CONTENTS: ROOT BRIDGE ID, 
+					SENDERS BRIDGE ID 
+					STP PORT COST FROM SENDER TO THE ROOT BRIDGE
+					STP TIMERS
+3. HOW DO SWITCHES KNOW WHICH LINK/INTERFACES TO BLOCK TO PREVENT SWITCHING LOOP?
+	A. OPERATING STATES:
+		1. FORWARDING STATES
+			- GREEN LED LIGHT
+			- NORMAL OPERATION
+			- TRANSMITS AND RECEIVES FRAMES
+			- TRANSMITS AND RECEIVES BPDUs
+		2. BLOCKING STATES
+			- AMBER LED LIGHT
+			- DROPS FRAMES RECEIVED
+			- DOES NOT SEND OUT FRAMES
+			- DOES NOT SEND OUT BPDUS
+			- RECEIVES BPDUS 
+
+	B. TRANSITIONAL STATES
+		
+		1. LISTENING
+			- DOES NOT TRANSMIT BPDU, BUT RECEIVES BPDU
+			- DISCARD MAC ADD LEARNED FROM THIS INTERFACE
+		2. LEARNING
+			- DOES NOT TRANSMIT BPDU, BUT RECEIVED BPDU
+			- DOES NOT TRANSMIT FRAMES, BUT RECEIVES FRAMES
+			- POPULATES MAC ADD LEARNED ON THIS INTERFACE
+		3. DISABLED
+
+
+
+4. STP PROCESS:
+	STEP 1. THEY NEED TO ELECT A ROOT BRIDGE [RB]
+			- CHECKING CRITERIA FOR JUDGING TO ELECT RB: LOWEST VALUE
+				1. LOWEST BRIDGE
+				2. MAC ADDRESS / SYSTEM ID
+			- NOTE: AT THE START OF ELECTION, ALL SWITCHES CLAIM TO BE THE ROOT BRIDGE
+			- BASED ON BPDU CONTENT, THEY ELECT THEIR RB
+			- DEFAULT STP COSTS
+				10 MBPS	100
+				100 MBPS	19
+				2 GBPS 	6
+				10 GBPS	2
+			- COST = INCOMING COST + STP PORT COST OF THE INGRESS PORT
+			
+			ROOT BRIDGE
+			===========
+			- STP FORWARDING TRAFFIC BOSS
+			- CENTRAL POINT OF THE NETWORK
+			- ALL POWERFUL SWITCH 
+			- ALL PORTS ARE DESIGNATED PORT OR FORWARDING PORT
+	
+	STEP 2. THEY NEED TO ASSIGN STP PORT ROLES
+			- ROOT PORT - [RP] PORT WITH LOWEST STP PORT COST GOING TO THE BRIDGE - PORT NEAR THE ROOT BRIDGE
+				ALL PORTS ARE DESIGNATED PORT OR FORWARDING PORT
+			- DESIGNATED PORT - [DP] A FORWARDING PORT. STP COMBO  [RP-DP], [BP-DP] - ONE DP PER LINK ONLY
+												 ----------------
+			- FIND THE ROOT PORT ON ALL NON-ROOT BRIDGE SWITCHES
+			- ALTERNATE BLOCKING PORT [BP] - DROP FRAMES
+			
+	STEP 3. THEN, THEN CAN BLOCK AN INTERFACE - ALL LINKS W/O A ROOT PORT [RP] WILL BECOME THE BLOCKING PORT 
+			- BLOCKING PORT IS THE ONE WITH HIGHEST MAC ADDRESS
+			- ALL LINK WITHOUT A ROOT PORT, ONE PORT MUST BE BLOCKING
+			- PORT WITH HIGHER BRIDGE ID WILL BE THE BLOCKING PORT 
+
+
+
+
+5. WHAT HAPPENED WHEN ONE OF THE LINK FAILED
+	A. IF IT STOPS RECEIVING BPDUs ON AN INTERFACE
+	B. IF IT RECEIVES A BPDU WITH A DIFFERENT VALUE
+
+	BY STP TIMERS:		TIMERS			RSTP  
+	HELLO BPDU		2 SECS			2 SECS
+	MAX AGE (HOLD TIME)	20 SEC = 10 x 2 HELLO  	6 SECS = 3 x 2 HELLO  
+	LISTENING		15 SECS			--
+	LEARNING		15 SECS			--
+				-------			------------
+				TOTAL 50 SECS		8 SECS	
+
+
+
+BPDU CONTENTS
+1. RBID (PRIORITY AND MAC ADDRESS)
+2. SBID
+3. STP COST
+4. STP TIMERS
+
+
+SW1#sh spanning-tree
+VLAN0001
+  Spanning tree enabled protocol ieee
+
+** ROOT BRIDGE ID [RBID]
+  Root ID    Priority    32769
+             Address     0001.4366.808D
+             This bridge is the root
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+
+** SENDERS BRIDGE ID [SBID]
+
+  Bridge ID  Priority    32769  (priority 32768 sys-id-ext 1)
+             Address     0001.4366.808D
+             Hello Time  2 sec  Max Age 20 sec  Forward Delay 15 sec
+             Aging Time  20
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Fa0/1            Desg FWD 19        128.1    P2p
+Fa0/2            Desg FWD 19        128.2    P2p
+Fa0/3            Desg FWD 19        128.3    P2p
+
+
+** FORWARD DELAY TIMER: LISTENING ANF LEARNING TIMERS BOTH 15 SECS EACH
+
+
+
+STP TYPES - IEE CODE
+1. STP - 802.1D	
+
+2. RSTP - 802.1W 
+			
+3. PVSTP
+	- PER VLAN STP
+	- CISCO PROPRIETARY
+
+3. MST- 802.1S
+	- MULTIPLE STP 
+	- IEEE STANDARD
+	
+
+
+
+STP PROTOCOLS
+========================
+SW1, SW2, SW3
+--------------
+- TO VIEW MACH ADDRESS
+sh version
+
+- COPY MAC ADDRESS: 
+SW1: 0001.4366.808D
+SW2: 0030.F22B.5A28
+SW3: 00E0.A3C2.7B44
+
+
+- TO VERIFY STP - [PVST] PER VLAN STP
+sh spanning-tree
+
+
+- TO VIEW STP INSTANCE PER VLAN
+sh spanning-tree vlan 1
+
+BPDU CONTENTS
+1. RBID (PRIORITY AND MAC ADDRESS)
+2. SBID
+3. STP COST
+4. STP TIMERS
+
+
+FOR PVST:
+PRIORITY DEFAULT ID: 32768 + VLAN 1 = 32768 + 1 = 32769
+
+
+
+PVSTP CONFIGURATION
+====================
+
+PRIMARY ROOT BRIDGE
+SW1 -> VLAN 10, 20
+SW2 -> VLAN 30
+SW3 -> VLAN 40
+
+
+SECONDARY ROOT BRIDGE
+SW1 -> VLAN 30
+SW2 -> VLAN 20, 40
+SW3 -> VLAN 10
+
+
+* IF YOU THE THE SYNTAX BELOW, THIS WILL HAPPEN TO SWITCH
+----------------------------------------------------------
+ROOT PRIMARY
+IF PRIORITY IS GREATER THAN [>] 24576, THEN IT WILL SET TO 24576
+
+IF PRIORITY < 24576, THEN SET PRIORITY TO THE HIGHEST MULTIPLE OF 4096 THAT WILL MAKE IT A ROOT BRIDGE.
+
+SECONDARY ROOT
+SET PRIORITY = 28672, REGARDLESS OF THE PRESENT PRIORITY VALUE
+
+
+SYNTAX:
+SW1:
+-----	
+conf t
+spanning-tree vlan 10,20 root primary
+! pede rin: spanning-tree vlan 1-100 root primary
+spanning-tree vlan 30 root secondary
+exit
+
+*** SW1 is the root primary in vlan 10 and vlan 20
+
+VERIFY
+sh spanning-tree vlan 10, 20
+
+SW1 VLAN 10 ROOT PRIMARY
+Priority    24586 [ 24576 + 10 ]
+
+SW1 VLAN 20 ROOT SECONDARY
+Priority    24596  [ 24576 + 20 ]
+
+SW1 VLAN 30 ROOT SECONDARY
+Priority    28702 [ 28672 + 30 ]
+
+
+
+SW2
+----
+conf t
+spanning-tree vlan 30 root primary
+spanning-tree vlan 20,40 root secondary
+exit
+
+
+SW3
+----
+conf t
+spanning-tree vlan 40 root primary
+spanning-tree vlan 10 root secondary
+exit
+
+
+PROBLEM WITH STP
+> STP IS ENABLED ON ALL INTERFACES BY DEFAULT
+> WITH MAX AGE OF 50 SECS BEFORE CONNECTING, IT'S TOO MUCH TIME BEFORE SOMEBODY CAN CONNECT A SWITCH ON THE INTERFACE
+
+RSTP - 15 SECS, HAS NO LISTENING STATE, IT ONLY HAS LEARNING STATE
+
+
+PORTFAST BPDU TOPO:
+
+
+
+
+
+PORFAST
+- TRANSITION IMMEDIATELY FROM A BLOCKING STATE INTO FORWARDING STATE
+- NOT WAITING FOR LINISTENING STATE AND LEARNING STATE
+- SHOULD ONLY BE CONFIGURED ON INTERFACE WHERE END DEVICES ARE CONNECTED
+- BUT, WHAT IF A SWITCH IS CONNECTED TO A PORTFAST ENABLED INTERFACE?
+
+SOLUTION:
+BPDU GUARD 
+- ALL INTERFACES WITH PORFAST ENABLED, SHOULD HAVE THIS CONFIGURATION.
+- WHEN AN INTERFACE HAS CONFIGURATION OF PORFAST AND BPDU GUARD, WHEN A SWITCH IS CONNECTED IT WILL SET TO ERR-DISABLED STATUS TO PROVENT LOOP 
+
+
+***
+IT IS RECOMMENDED TO CONFIGURED PORTFAST AND BPDU GUARD
+
+
+CONFIGURING PORTFAST AND BPDU GUARD
+------------------------------------
+SW
+----
+conf t 
+int fa0/1
+spanning-tree portfast
+spanning-tree bpduguard enable
+exit
+
+TO FIX THE ERR-DISABLED STATE IN AN INTERFACE
+SYNTAX:
+shutdown
+no shutdown
+
+
+
+
+STP Port Roles
+
+does root port in a switch forward BPDUs?
+
+
+Yes, a root port in a switch forwards Bridge Protocol Data Units (BPDUs). Here's how it works:
+
+- **Root Port (RP)**: This is the port on a switch that has the best path to the root bridge. A switch will only have one root port.
+- The switch receives BPDUs from its designated root port to stay updated about the spanning tree topology.
+- The switch will forward BPDUs through all of its designated ports (but not back through the root port), allowing other switches to receive updated information about the spanning tree.
+
+However, BPDUs are **not originated by the root port**; they are only forwarded if they were received from another switch upstream (closer to the root bridge).
+
+If you need more clarification on any part of Spanning Tree Protocol (STP), feel free to ask!
+
+
+
+
+
+does the designated port is the only port that transmit bpdu in stp process?
+
+No, the **designated port** is not the only port that transmits BPDUs in the STP process. Here's a breakdown of BPDU transmission in different port roles:
+
+1. **Root Bridge**: The root bridge generates and transmits BPDUs out of all its designated ports.
+   
+2. **Designated Ports**: These ports transmit BPDUs toward downstream switches (those further away from the root bridge) in the spanning tree topology. Each network segment (collision domain) has only one designated port, which is responsible for forwarding BPDUs to ensure that the network segment has connectivity to the root bridge.
+
+3. **Root Ports**: Although root ports do not originate BPDUs, they do **forward** BPDUs they receive from the designated port on the upstream switch (closer to the root bridge).
+
+4. **Non-designated (blocked) Ports**: These ports neither forward traffic nor transmit BPDUs. They still receive BPDUs to listen for network topology changes but remain in a blocked state unless there's a topology change that makes them active.
+
+### Summary:
+- **Root Bridge**: Originates BPDUs on all its designated ports.
+- **Designated Ports**: Transmit BPDUs downstream.
+- **Root Ports**: Forward BPDUs received from the upstream switch.
+- **Blocked Ports**: Do not transmit BPDUs.
+
+Would you like further details on the roles of ports or the STP process?
+
+
+
+
+
+
+
+does root port forward bpdu in a designated port in the same switch? 
+
+No, the root port does not forward BPDUs to a designated port on the same switch. Here's how it works:
+
+Root Port: This is the port on the switch with the best path to the root bridge. The root port receives BPDUs from the upstream switch (the one closer to the root bridge).
+
+Designated Port: This is the port on the switch that forwards BPDUs downstream (toward switches further away from the root bridge) to ensure that the network segment remains connected to the root bridge.
+
+BPDU Forwarding Behavior:
+BPDUs received on the root port are not forwarded to the switch's own designated ports. Instead, the switch processes those BPDUs and then generates new BPDUs based on its current role and status, which it transmits out of its designated ports.
+The designated ports on the switch generate and transmit their own BPDUs downstream, based on the information received from the root port or other upstream BPDUs.
+Important Points:
+BPDUs flow from the root bridge downward through the network.
+Each switch evaluates the BPDUs it receives, recalculates its role in the spanning tree, and then sends out its own BPDUs through its designated ports.
+BPDUs do not travel from the root port to other ports on the same switch; instead, the switch sends new BPDUs out its designated ports.
+Let me know if you'd like more clarification on this!
+
+
+
+		
