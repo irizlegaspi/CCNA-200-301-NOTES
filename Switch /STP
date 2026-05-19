@@ -364,4 +364,39 @@ Let me know if you'd like more clarification on this!
 
 
 
+VERIFY:
+On a Cisco switch, you can view the MAC addresses learned on each interface using the show mac address-table command.
+Here are the most common ways to do it:
+
+1. See all MAC addresses on the switch
+
+	show mac address-table
+This lists all learned MAC addresses, their VLAN, type (dynamic/static), and the interface they are associated with.
+
+2. See MAC addresses for a specific interface
+	show mac address-table interface GigabitEthernet1/0/1
+Replace GigabitEthernet1/0/1 with your actual interface name.
+Example output:
+	Copy code
+	Vlan    Mac Address       Type        Ports
+	----    -----------       --------    -----
+	  10    aabb.ccdd.eeff    DYNAMIC     Gi1/0/1
+3. See MAC addresses for a specific VLAN
+	show mac address-table vlan 10
+This filters the MAC table for VLAN 10 only.
+
+4. For multiple interfaces (workaround)
+Cisco IOS does not support show mac address-table interface range directly.
+Instead, you can loop through interfaces in privileged EXEC mode:
+
+	show mac address-table | include Gi1/0/
+This filters the output to only show interfaces starting with Gi1/0/.
+
+✅ Tip:
+If you want to see live traffic MAC learning, you can also use:
+
+	show mac address-table dynamic
+to display only dynamically learned MACs.
+
+
 		
