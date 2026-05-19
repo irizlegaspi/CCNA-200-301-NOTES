@@ -1,8 +1,17 @@
-STP - SPANNING TREE PROTOCOL
+🌐 STP - SPANNING TREE PROTOCOL
 ============================
 
 🌐 STP (Spanning Tree Protocol) is a Layer 2 protocol used in switching to prevent looping issues in networks with redundant paths. 
 Without STP, switches could forward frames endlessly in a loop, causing broadcast storms, MAC table instability, and multiple frame copies reaching devices—basically, network chaos.
+
+Cisco Switching Protocols
+                      
+1. 802.1Q - Trunking - "Qpid" - tagging of vlan, untagged vlan goes to VLAN 1
+2. 802.1d - STP      - "Darna"
+3. 802.1w - RSTP     - "Wonderwoman"
+4. 802.1s - MSTP     - "Superman" - Multiple STP
+5. 802.1x - Port Security - "X-Men"
+
 
 
 
@@ -140,13 +149,10 @@ Fa0/3            Desg FWD 19        128.3    P2p
 
 STP TYPES - IEE CODE
 1. STP - 802.1D	
-
-2. RSTP - 802.1W 
-			
+2. RSTP - 802.1W 	
 3. PVSTP
 	- PER VLAN STP
 	- CISCO PROPRIETARY
-
 3. MST- 802.1S
 	- MULTIPLE STP 
 	- IEEE STANDARD
@@ -158,7 +164,7 @@ STP PROTOCOLS
 ========================
 SW1, SW2, SW3
 --------------
-- TO VIEW MACH ADDRESS
+- TO VIEW MAC ADDRESS
 sh version
 
 - COPY MAC ADDRESS: 
@@ -182,6 +188,7 @@ BPDU CONTENTS
 
 
 FOR PVST:
+PRIORITY DEFAULT ID: 32768 + # VLAN = 32768 + 1 = 32769
 PRIORITY DEFAULT ID: 32768 + VLAN 1 = 32768 + 1 = 32769
 
 
@@ -224,7 +231,7 @@ exit
 *** SW1 is the root primary in vlan 10 and vlan 20
 
 VERIFY
-sh spanning-tree vlan 10, 20
+sh spanning-tree vlan 10,20
 
 SW1 VLAN 10 ROOT PRIMARY
 Priority    24586 [ 24576 + 10 ]
@@ -266,14 +273,14 @@ PORTFAST BPDU TOPO:
 
 
 
-PORFAST
+PORFAST: For connection on end devices only
 - TRANSITION IMMEDIATELY FROM A BLOCKING STATE INTO FORWARDING STATE
 - NOT WAITING FOR LINISTENING STATE AND LEARNING STATE
 - SHOULD ONLY BE CONFIGURED ON INTERFACE WHERE END DEVICES ARE CONNECTED
 - BUT, WHAT IF A SWITCH IS CONNECTED TO A PORTFAST ENABLED INTERFACE?
 
 SOLUTION:
-BPDU GUARD 
+BPDU GUARD : For connection on end devices only
 - ALL INTERFACES WITH PORFAST ENABLED, SHOULD HAVE THIS CONFIGURATION.
 - WHEN AN INTERFACE HAS CONFIGURATION OF PORFAST AND BPDU GUARD, WHEN A SWITCH IS CONNECTED IT WILL SET TO ERR-DISABLED STATUS TO PROVENT LOOP 
 
@@ -307,42 +314,32 @@ does root port in a switch forward BPDUs?
 
 Yes, a root port in a switch forwards Bridge Protocol Data Units (BPDUs). Here's how it works:
 
-- **Root Port (RP)**: This is the port on a switch that has the best path to the root bridge. A switch will only have one root port.
+- Root Port (RP): This is the port on a switch that has the best path to the root bridge. A switch will only have one root port.
 - The switch receives BPDUs from its designated root port to stay updated about the spanning tree topology.
 - The switch will forward BPDUs through all of its designated ports (but not back through the root port), allowing other switches to receive updated information about the spanning tree.
 
-However, BPDUs are **not originated by the root port**; they are only forwarded if they were received from another switch upstream (closer to the root bridge).
-
-If you need more clarification on any part of Spanning Tree Protocol (STP), feel free to ask!
-
-
-
+However, BPDUs are "not originated by the root port"; they are only forwarded if they were received from another switch upstream (closer to the root bridge).
 
 
 does the designated port is the only port that transmit bpdu in stp process?
 
-No, the **designated port** is not the only port that transmits BPDUs in the STP process. Here's a breakdown of BPDU transmission in different port roles:
+No, the "designated port" is not the only port that transmits BPDUs in the STP process. Here's a breakdown of BPDU transmission in different port roles:
 
-1. **Root Bridge**: The root bridge generates and transmits BPDUs out of all its designated ports.
+1. Root Bridge: The root bridge generates and transmits BPDUs out of all its designated ports.
    
-2. **Designated Ports**: These ports transmit BPDUs toward downstream switches (those further away from the root bridge) in the spanning tree topology. Each network segment (collision domain) has only one designated port, which is responsible for forwarding BPDUs to ensure that the network segment has connectivity to the root bridge.
+2. Designated Ports: These ports transmit BPDUs toward downstream switches (those further away from the root bridge) in the spanning tree topology. 
+	Each network segment (collision domain) has only one designated port, which is responsible for forwarding BPDUs to ensure that the network segment has connectivity to the root bridge.
 
-3. **Root Ports**: Although root ports do not originate BPDUs, they do **forward** BPDUs they receive from the designated port on the upstream switch (closer to the root bridge).
+3. Root Ports: Although root ports do not originate BPDUs, they do "forward" BPDUs they receive from the designated port on the upstream switch (closer to the root bridge).
 
-4. **Non-designated (blocked) Ports**: These ports neither forward traffic nor transmit BPDUs. They still receive BPDUs to listen for network topology changes but remain in a blocked state unless there's a topology change that makes them active.
+4. Non-designated (blocked) Ports: These ports neither forward traffic nor transmit BPDUs. 
+		They still receive BPDUs to listen for network topology changes but remain in a blocked state unless there's a topology change that makes them active.
 
 ### Summary:
-- **Root Bridge**: Originates BPDUs on all its designated ports.
-- **Designated Ports**: Transmit BPDUs downstream.
-- **Root Ports**: Forward BPDUs received from the upstream switch.
-- **Blocked Ports**: Do not transmit BPDUs.
-
-Would you like further details on the roles of ports or the STP process?
-
-
-
-
-
+- Root Bridge: Originates BPDUs on all its designated ports.
+- Designated Ports: Transmit BPDUs downstream.
+- Root Ports: Forward BPDUs received from the upstream switch.
+- Blocked Ports: Do not transmit BPDUs.
 
 
 does root port forward bpdu in a designated port in the same switch? 
@@ -351,13 +348,16 @@ No, the root port does not forward BPDUs to a designated port on the same switch
 
 Root Port: This is the port on the switch with the best path to the root bridge. The root port receives BPDUs from the upstream switch (the one closer to the root bridge).
 
-Designated Port: This is the port on the switch that forwards BPDUs downstream (toward switches further away from the root bridge) to ensure that the network segment remains connected to the root bridge.
+Designated Port: This is the port on the switch that forwards BPDUs downstream (toward switches further away from the root bridge) 
+to ensure that the network segment remains connected to the root bridge.
 
 BPDU Forwarding Behavior:
-BPDUs received on the root port are not forwarded to the switch's own designated ports. Instead, the switch processes those BPDUs and then generates new BPDUs based on its current role and status, which it transmits out of its designated ports.
+BPDUs received on the root port are not forwarded to the switch's own designated ports. 
+Instead, the switch processes those BPDUs and then generates new BPDUs based on its current role and status, which it transmits out of its designated ports.
 The designated ports on the switch generate and transmit their own BPDUs downstream, based on the information received from the root port or other upstream BPDUs.
+
 Important Points:
-BPDUs flow from the root bridge downward through the network.
+BPDUs flow from the root bridge downward through the network to the root port of the receiving switch.
 Each switch evaluates the BPDUs it receives, recalculates its role in the spanning tree, and then sends out its own BPDUs through its designated ports.
 BPDUs do not travel from the root port to other ports on the same switch; instead, the switch sends new BPDUs out its designated ports.
 Let me know if you'd like more clarification on this!
