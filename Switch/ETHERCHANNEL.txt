@@ -1,0 +1,737 @@
+ETHERCHANNEL & LINK AGGREGATION
+================================
+
+PROBLEMS WITH STP:
+1. IT TAKES AWHILE TO CONVERGE
+2. IF YOU HAVE MULTIPLE CONNECTION ON 2 SWITCHES
+
+
+
+ETHERCHANNEL & LINK AGGREGATION
+1. BUNDLES MULTIPLE LINKS INTO ONE LOGICAL LINK
+2. STP WILL TREAT A BUNDLE AS IF IT IS A SINGLE LINK
+
+ADVANTAGES OF BUNDLING 
+1. REDUCES DOWNTIME
+2. EFFECTIVELY INCREASES BANDWIDTH
+
+ETHERCHANNEL NEGOTIATION PROTOCOLS
+1. PAGP 
+	- PORT AGGREGATION PROTOCOL
+	- CISCO PROPRIETARY
+	- MODES: AUTO, DESIRABLE
+
+2. LACP 
+	- LINK AGGREGATION PROTOCOL
+	- IEEE STANDARD
+	- MODES: ACTIVE AND PASSIVE
+
+
+MODES:
+
+DTP - NEGOTITATION TRUNKING BETWEEN 2 SWITCHES
+PAGP & LACP - NEGOTIATION BUNDLING BETWEEN INTERFACES
+
+
+SUMMARY
+TRUNKING NEGO		BUNDLING NEGO
+DTP			PAGP		LACP
+CISCO			CISCO		IEEE
+AUTO (WAITS)		AUTO		PASSIVE
+DESIRABLE (INITIATES)	DESIRABLE	ACTIVE
+NO NEGOTIATE		ON		ON
+ 
+
+COUNTERPART OF DTP NO NEGO FOR PAGP/LACP:MODE: ON 		
+
+* MODE ON 
+- EXPLICITYLY TURNS ON ETHERCAHHANEL
+- DOES NOT NEGOTIATE. DOES NOT SEND OUT NEGOTATIAON PACKETS
+
+AUTO - NOT SENDING A PACKET
+DESIRABLE- READY TO TRUNK
+NO NEGOTIATE - DISABLE SENDING OF PACKET
+
+PAGP AND LACP COMBINATION
+-------------------------
+PAGP 
+----
+AUTO		- DESIRABLE	= BUNDLE
+DESIRABLE	- AUTO		= BUNDLE
+	 	- DESIRABLE	= BUNDLE
+AUTO		- AUTO		= NO BUNDLING
+
+LACP
+----
+PASSIVE		- ACTIVE	= BUNDLE
+ACTIVE		- PASSIVE	= BUNDLE
+	 	- ACTIVE	= BUNDLE
+PASSIVE		- PASSIVE	= NO BUNDLING		
+
+
+
+NO NEGO
+ON-ON
+
+============================
+    BASIC CONFIGURATION
+============================
+R1
+----
+conf t
+hostname R1
+enable secret cisco
+service password-encryption
+!
+line vty 0 4
+password cisco
+login
+exec-timeout 0 0
+exit
+!
+line con 0
+password cisco
+login
+exec-timeout 0 0
+exit
+!
+banner login $
+==================
+        R1
+================== $
+exit
+
+
+SW1
+----
+conf t
+hostname SW1
+enable secret cisco
+service password-encryption
+!
+line vty 0 4
+password cisco
+login
+exec-timeout 0 0
+exit
+!
+line con 0
+password cisco
+login
+exec-timeout 0 0
+exit
+!
+banner motd $
+===================
+        SW1
+=================== $
+exit
+
+
+SW2
+-----
+conf t
+hostname SW2
+enable secret cisco
+service password-encryption
+!
+line vty 0 4
+password cisco
+login
+exec-timeout 0 0
+exit
+!
+line con 0
+password cisco
+login
+exec-timeout 0 0
+exit
+!
+banner motd $
+===================
+        SW2
+=================== $
+exit
+
+
+
+SW3
+-----
+conf t
+hostname SW3
+enable secret cisco
+service password-encryption
+!
+line vty 0 4
+password cisco
+login
+exec-timeout 0 0
+exit
+!
+line con 0
+password cisco
+login
+exec-timeout 0 0
+exit
+!
+banner motd $
+===================
+        SW3
+=================== $
+exit
+
+
+COPY MAC-ADDRESS
+SW1: 00D0.974C.9CC3
+SW2: 0010.11AA.620C
+SW3: 0005.5E1A.710C
+
+
+
+
+
+
+
+============================
+     CONFIGURATION STP
+============================
+
+TASK 1.) CONFIGURE SW1 TO BE THE PRIMARY ROOT BRIDGE FOR VLAN 1
+
+SW1
+----
+conf t
+spanning-tree vlan 1 root primary
+exit
+
+Verify:
+sh spanning-tree vlan 1
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- -----
+Fa0/3            Desg LRN 19        128.3    P2p
+Fa0/4            Desg LRN 19        128.4    P2p
+Fa0/5            Desg LSN 19        128.5    P2p
+Fa0/6            Desg LRN 19        128.6    P2p
+
+
+TASK 2.) CONFIGURE SW2 TO BE THE SECONDARY ROOT BRIDGE FOR VLAN 1
+
+SW2
+----
+conf t
+spanning-tree vlan 1 root secondary
+exit
+
+Verify:
+sh spanning-tree vlan 1
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- ------
+Fa0/1            Root FWD 19        128.1    P2p
+Fa0/3            Desg FWD 19        128.3    P2p
+Fa0/5            Desg FWD 19        128.5    P2p
+Fa0/2            Altn BLK 19        128.2    P2p
+Fa0/4            Desg FWD 19        128.4    P2p
+
+
+
+TASK 3.) CONFIGURE PORTFAST AND BPDU GUARD ON SW2 AND SW3 F0/5 INTERFACE
+
+SW2
+---
+conf t
+int fa0/5
+spanning-tree portfast
+spanning-tree bpduguard enable
+exit
+
+
+Verify:
+sh run | section interface FastEthernet0/5
+
+
+SW3
+----
+conf t
+int fa0/5
+spanning-tree portfast
+spanning-tree bpduguard enable
+exit
+
+
+
+
+
+TASK 4.) CONFIGURE THESE IP ADDR FOR PC1 AND PC2:
+	PC1 - 192.168.1.10 /24
+	PC2 - 192.168.1.20 /24
+
+** PC1> ip <IP ADDR> /<SUBNET MASK> <DEF GW IP>
+** PC1: ip 192.168.1.10/24 
+** PC2: ip 192.168.1.20/24
+
+
+
+
+SW3
+----
+sh spanning-tree vlan 1
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- ------
+Fa0/3            Altn BLK 19        128.3    P2p
+Fa0/4            Altn BLK 19        128.4    P2p
+Fa0/1            Root FWD 19        128.1    P2p
+Fa0/2            Altn BLK 19        128.2    P2p	- back up
+Fa0/5            Desg FWD 19        128.5    P2p
+
+
+
+
+=====================================
+     CONFIGURATION ETHERCHANNEL
+=====================================
+
+
+---------------------
+	SW1
+---------------------
+PORT-CHANNEL	: 1
+MODE		: ACTIVE
+INT		: F0/3, F0/4
+ETHERCHANNEL PR	: LACP
+
+Verify: sh spanning-tree vlan 1
+
+! CONFIGURE PORT-CHANNEL ETHERNETCHANNEL
+-----------------------------------------
+
+conf t
+! USE INTERFACE RANGE COMMAND TO MAKE SURE THAT CORRECT INTERFACES ARE IN THE BUNDLE 
+interface range f0/3-4
+! WHEN CONFIGURING ETHERCHANNEL, YOU MUST CONFIGURE TO SHUTDOWN THE INTERFACE FIRST
+shutdown
+!
+! INFORM THE SWITCH WHAT INTERFACE NEGO PROTOCOL WOULD BE USED
+! channel-protocol ?
+channel-protocol lacp
+! WE CAN NOW CREATE THE PORT-CHANNEL GROUP NO.
+channel-group <group #> mode <mode>
+!channel-group 1 mode ?
+channel-group 1 mode active
+!
+no shut
+exit
+
+
+Verify: 
+sh etherchannel summary
+sh ip int br
+sh spanning-tree vlan 1
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Fa0/5            Desg FWD 19        128.5    P2p
+Fa0/6            Desg FWD 19        128.6    P2p
+Po1              Desg FWD 12        128.27   Shr
+
+
+CONFIGURE THE PORT CHANNEL TO BE TRUNKS
+----------------------------------------
+
+SW1
+----
+
+Verify:
+SW1#sh int trunk
+Port        Mode         Encapsulation  Status        Native vlan
+Po1         desirable    n-802.1q       trunking      1
+
+conf t
+int port-channel 1
+switchport mode trunk
+exit
+
+SW1#sh int trunk
+Port        Mode         Encapsulation  Status        Native vlan
+Po1         on           802.1q         trunking      1
+
+
+
+SW1
+---
+PORT-CHANNEL	: 2
+MODE		: AUTO
+INT		: F0/5, F0/6
+ETHERCHANNEL PR	: PAGP
+
+sh spanning-tree vlan 1
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- ------
+Fa0/5            Desg FWD 19        128.5    P2p
+Fa0/6            Desg FWD 19        128.6    P2p
+Po1              Desg FWD 12        128.27   Shr
+
+
+! CONFIGURE PORT-CHANNEL ETHERNETCHANNEL
+----------------------------------------
+
+conf t
+interface range f0/5-6
+shutdown
+channel-protocol pagp
+channel-group 2 mode auto
+no shut
+exit
+
+Verify: 
+sh etherchannel summary
+Group  Port-channel  Protocol    Ports
+------+-------------+-----------+----------------------------------------------
+
+1      Po1(SU)           LACP   Fa0/3(P) Fa0/4(P) 
+2      Po2(SD)           PAgP   Fa0/5(I) Fa0/6(I) 
+
+sh ip int br
+sh spanning-tree vlan 1
+
+
+! CONFIGURE PORT-CHANNEL 2 TO BE TRUNK
+--------------------------------------
+SW1#sh int trunk
+Port        Mode         Encapsulation  Status        Native vlan
+Po1         on           802.1q         trunking      1
+Po2         desirable    n-802.1q       trunking      1
+
+conf t
+int port-channel 2
+switchport mode trunk
+exit
+
+SW1#SH INT TRUNK
+Port        Mode         Encapsulation  Status        Native vlan
+Po1         on           802.1q         trunking      1
+Po2         on           802.1q         trunking      1
+
+
+
+
+sh etherchannel summary
+! AFTER SW3 CONFIGURATION f0/1-2
+
+Group  Port-channel  Protocol    Ports
+------+-------------+-----------+----------------------------------------------
+
+1      Po1(SU)           LACP   Fa0/3(P) Fa0/4(P) 
+2      Po2(SU)           PAgP   Fa0/5(P) Fa0/6(P) 
+
+
+
+
+
+---------------------
+	SW2
+---------------------
+PORT-CHANNEL	: 2
+MODE		: PASIVE
+INT		: F0/1, F0/2
+ETHERCHANNEL PR	: LACP
+
+Verify: sh spanning-tree vlan 1
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- -----
+Fa0/1            Root FWD 19        128.1    P2p
+Fa0/3            Desg FWD 19        128.3    P2p
+Fa0/5            Desg FWD 19        128.5    P2p
+Fa0/2            Altn BLK 19        128.2    P2p
+Fa0/4            Desg FWD 19        128.4    P2p
+
+! CONFIGURE PORT CHANNEL ETHERCANNEL 
+----------------------------------------
+
+conf t
+interface range f0/1-2
+shutdown
+channel-protocol lacp
+channel-group 2 mode passive
+no shut
+exit
+
+Verify: 
+sh etherchannel summary
+sh ip int br
+sh spanning-tree vlan 1
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- ------
+Fa0/3            Desg FWD 19        128.3    P2p
+Fa0/5            Desg FWD 19        128.5    P2p
+Fa0/4            Desg FWD 19        128.4    P2p
+Po2              Root FWD 12        128.27   Shr
+
+! CONFIGURE THE PORT CHANNEL TO BE TRUNKS
+----------------------------------------
+
+SW2
+----
+SW2#sh int trunk
+Port        Mode         Encapsulation  Status        Native vlan
+Po2         desirable    n-802.1q       trunking      1
+
+conf t
+int port-channel 2
+switchport mode trunk
+exit
+
+SW2#sh int trunk
+Port        Mode         Encapsulation  Status        Native vlan
+Po2         on           802.1q         trunking      1
+
+
+
+-----------------------------
+PORT-CHANNEL	: 4
+MODE		: ON
+INT		: F0/3, F0/4
+ETHERCHANNEL PR	: NO NEGO
+-----------------------------
+
+
+! CONFIGURE PORT-ETHERCHANNEL BUNDLE
+--------------------------------
+
+Verify:
+sh spanning-tree vlan 1
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- -----
+Fa0/3            Desg FWD 19        128.3    P2p
+Fa0/5            Desg FWD 19        128.5    P2p
+Fa0/4            Desg FWD 19        128.4    P2p
+Po2              Root FWD 12        128.27   Shr
+
+conf t
+interface range f0/3-4
+shutdown
+channel-group 4 mode on
+no shut
+exit
+
+sh etherchannel sum
+Group  Port-channel  Protocol    Ports
+------+-------------+-----------+-----------------
+2      Po2(SU)           LACP   Fa0/1(P) Fa0/2(P) 
+4      Po4(SU)           -      Fa0/3(P) Fa0/4(P) 
+
+
+sh spanning-tree vlan 1
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- --------------------------------
+Fa0/3            Desg FWD 19        128.3    P2p
+Fa0/5            Desg FWD 19        128.5    P2p
+Fa0/4            Desg FWD 19        128.4    P2p
+Po2              Root FWD 12        128.27   Shr
+Po4              Desg BKN*12        128.28   Shr *TYPE_Inc
+
+sh etherchannel port-channel
+
+! CONFIGURE TRUNK MODE
+----------------------
+
+sh int trunk
+Port        Mode         Encapsulation  Status        Native vlan
+Po3         on           802.1q         trunking      1
+Fa0/5       desirable    n-802.1q       trunking      1
+
+conf t
+int port-channel 4
+switchport mode trunk
+exit
+
+
+SW2#sh int trunk
+Port        Mode         Encapsulation  Status        Native vlan
+Po2         on           802.1q         trunking      1
+Po4         on           802.1q         trunking      1
+
+sh etherchannel port-channel
+
+
+
+
+
+
+
+			---------------------
+				SW3
+			---------------------
+
+PORT-CHANNEL	: 3
+MODE		: DESIRABLE
+INT		: F0/1, F0/2
+ETHERCHANNEL PR	: PAGP
+
+Verify: sh spanning-tree vlan 1
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- -----
+Fa0/3            Altn BLK 19        128.3    P2p
+Fa0/4            Altn BLK 19        128.4    P2p
+Fa0/1            Root FWD 19        128.1    P2p
+Fa0/2            Altn BLK 19        128.2    P2p
+Fa0/5            Desg FWD 19        128.5    P2p
+
+
+conf t
+interface range f0/1-2
+shutdown
+channel-protocol pagp
+channel-group 3 mode desirable
+no shut
+exit
+
+
+Verify:
+sh etherchannel summary
+
+Group  Port-channel  Protocol    Ports
+------+-------------+-----------+------------------
+3      Po3(SU)           PAgP   Fa0/1(P) Fa0/2(P) 
+
+
+sh ip int br
+sh spanning-tree vlan 1
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- ------
+Fa0/3            Altn BLK 19        128.3    P2p
+Fa0/4            Altn BLK 19        128.4    P2p
+Fa0/5            Desg FWD 19        128.5    P2p
+Po3              Root FWD 12        128.27   Shr
+
+
+
+! CONFIGURE MODE TRUNK
+------------------------
+
+SW3#sh int trunk
+Port        Mode         Encapsulation  Status        Native vlan
+Po3         desirable    n-802.1q       trunking      1
+
+conf t
+int port-channel 3
+switchport mode trunk
+exit
+
+SW3#SH INT TRUNK
+Port        Mode         Encapsulation  Status        Native vlan
+Po3         on           802.1q         trunking      1
+
+
+----------------------
+PORT-CHANNEL	: 5
+MODE		: ON
+INT		: F0/3, F0/4
+ETHERCHANNEL PR	: NO NEGO
+-----------------------
+
+Verify:
+sh spanning-tree vlan 1
+
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- ------
+Fa0/3            Altn BLK 19        128.3    P2p
+Fa0/4            Altn BLK 19        128.4    P2p
+Fa0/5            Desg FWD 19        128.5    P2p
+Po3              Root FWD 12        128.27   Shr
+
+
+conf t
+interface range f0/3-4
+shutdown
+channel-group 5 mode on
+no shut
+exit
+
+
+Verify: 
+sh eth summ
+
+Group  Port-channel  Protocol    Ports
+------+-------------+-----------+--------------------
+3      Po3(SU)           PAgP   Fa0/1(P) Fa0/2(P) 
+5      Po5(SD)           -      Fa0/3(s) Fa0/4(s) 
+
+
+sh ip int br
+
+sh spanning-tree vlan 1
+Interface        Role Sts Cost      Prio.Nbr Type
+---------------- ---- --- --------- -------- -----
+Fa0/5            Desg FWD 19        128.5    P2p
+Fa0/3            Desg FWD 19        128.3    P2p
+Fa0/4            Desg FWD 19        128.4    P2p
+Po3              Root FWD 12        128.27   Shr
+Po5              Altn BLK 12        128.28   Shr
+
+
+
+! CONFIGURE TRUNK MODE
+-----------------------
+conf t
+int port-channel 5
+switchport mode trunk
+exit
+
+
+sh etherchannel port-channel
+sh int trunk
+
+Group  Port-channel  Protocol    Ports
+------+-------------+-----------+----------------------------------------------
+
+3      Po3(SU)           PAgP   Fa0/1(P) Fa0/2(P) 
+5      Po5(SU)           -      Fa0/3(P) Fa0/4(P)
+
+
+
+
+! TEST
+SW3: 
+conf t
+int f0/1
+shut
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
