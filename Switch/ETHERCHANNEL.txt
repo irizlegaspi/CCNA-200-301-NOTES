@@ -35,12 +35,12 @@ PAGP & LACP - NEGOTIATION BUNDLING BETWEEN INTERFACES
 
 Summary
 
-		Trunking Nego		Budling Nego
+				Trunking Nego		Budling Nego
 
 Negotiation 	DTP (Cisco)		PagP (CISCO)	LACP (IEEE)
-Modes		AUTO (Waits)		Auto		Passive
-		Desirable		Desirable	Active
-		No Negotiate		On		On
+Modes			AUTO (Waits)	Auto			Passive
+				Desirable		Desirable		Active
+				No Negotiate	On				On
 
  
 
@@ -60,14 +60,14 @@ PAGP
 ----
 AUTO		- DESIRABLE	= BUNDLE
 DESIRABLE	- AUTO		= BUNDLE
-	 	- DESIRABLE	= BUNDLE
+	 		- DESIRABLE	= BUNDLE
 AUTO		- AUTO		= NO BUNDLING
 
 LACP
 ----
 PASSIVE		- ACTIVE	= BUNDLE
 ACTIVE		- PASSIVE	= BUNDLE
-	 	- ACTIVE	= BUNDLE
+	 		- ACTIVE	= BUNDLE
 PASSIVE		- PASSIVE	= NO BUNDLING		
 
 
@@ -299,8 +299,8 @@ Fa0/5            Desg FWD 19        128.5    P2p
 	SW1
 ---------------------
 PORT-CHANNEL	: 1
-MODE		: ACTIVE
-INT		: F0/3, F0/4
+MODE			: ACTIVE
+INT				: F0/3, F0/4
 ETHERCHANNEL PR	: LACP
 
 Verify: sh spanning-tree vlan 1
